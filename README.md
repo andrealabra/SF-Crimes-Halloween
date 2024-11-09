@@ -4,7 +4,7 @@ Explore San Francisco crime incidents on Halloween night with an interactive map
 
 ## 📊 Dataset
 
-The dataset includes San Francisco crime data for 2023, available directly from an online source. We use it to focus on Halloween night activities.
+The dataset includes San Francisco crime data for 2023, We use it to focus on Halloween night activities.
 
 ## 🔧 Requirements
 
