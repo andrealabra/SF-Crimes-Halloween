@@ -1,0 +1,79 @@
+---
+title: "homework3stats651"
+format:
+  html:
+    self-contained: true
+    toc: true                 
+    code-fold: true           
+    code-tools: true
+author: Andrea Labra
+editor: visual
+---
+
+## Homework #3
+
+```{r}
+# load packages
+library(tidyverse)
+library(lubridate)
+library(leaflet)
+library(tidygeocoder)
+```
+
+## Exercise 1
+
+```{r}
+
+locations <- tibble(address = c("Hayward, California", "San Francisco, California", "Los Angeles, California"))
+
+#Geocode
+coords <- locations %>%
+  geocode(address = address, method = "osm")
+
+leaflet(coords) %>%
+  addTiles() %>%
+  addMarkers(
+    lng = ~long, lat = ~lat,
+    popup = ~address
+  )
+
+
+```
+
+## Exercise 2
+
+```{r}
+sfcrimes <- readRDS(url("https://ericwfox.github.io/data/sfcrimes2023.rds"))
+
+#Parse datetime column based on its format
+sfcrimes <- sfcrimes %>%
+  mutate(datetime = parse_date_time(datetime, orders = "ymd HMS p"),  #Adjust format to th actual data
+         longitude = as.numeric(longitude),  
+         latitude = as.numeric(latitude))    
+
+#Filter for Halloween crimes between 18:00 and 23:59 and specific crime 
+filtered_crimes <- sfcrimes %>%
+  filter(date(datetime) == as_date("2023-10-31"),            # Select October 31, 2023
+         hour(datetime) >= 18, hour(datetime) <= 23,          # Between 18:00 and 23:59
+         category %in% c("Larceny Theft", "Motor Vehicle Theft", "Burglary"))  
+
+#Create labels by combining `category` and `datetime` as a character vector
+filtered_crimes <- filtered_crimes %>%
+  mutate(label = paste(as.character(category), as.character(datetime)))  # Ensure label is a character vector
+
+
+leaflet(filtered_crimes) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    lng = ~longitude, lat = ~latitude, 
+    color = ~case_when(
+      category == "Larceny Theft" ~ "pink",
+      category == "Motor Vehicle Theft" ~ "purple",
+      category == "Burglary" ~ "navy"
+    ),
+    radius = 5,
+    fillOpacity = 0.7,
+    label = ~label  # Use the new label column
+  )
+
+```
